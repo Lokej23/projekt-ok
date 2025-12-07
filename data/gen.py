@@ -60,7 +60,7 @@ def generate_data(n_cities, filename):
     }
 
     filename = checkJson(filename)
-    path = "data/" + filename
+    path = filename
     with open(path, 'w') as f:
         json.dump(data, f, indent=4)
     
