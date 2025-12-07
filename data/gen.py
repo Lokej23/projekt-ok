@@ -11,7 +11,7 @@ def checkJson(name: str) -> str:
 def distance(p1, p2):
     return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
-def generate_data(n_cities, filename):
+def generate_data(n_cities, filename, no_fuel=False, no_time=False):
     width, height = 100, 100
     coords = []
     
@@ -42,20 +42,30 @@ def generate_data(n_cities, filename):
     horizon = n_cities * 20 # przybliżony czas na odwiedzenie wszystkich miast
     
     for i in range(n_cities):
-        if i == 0:
-            t_windows.append([0, horizon]) # baza ma najszersze okno czasowe aby dało się odwiedzić wszystkie miasta
+        if no_time:
+            t_windows.append([0, horizon * 100])
         else:
-            start = random.uniform(0, horizon * 0.7)
-            duration = random.uniform(10, 30)
-            t_windows.append([round(start, 2), round(start + duration, 2)])
+            if i == 0:
+                t_windows.append([0, horizon]) # baza ma najszersze okno czasowe aby dało się odwiedzić wszystkie miasta
+            else:
+                start = random.uniform(0, horizon * 0.7)
+                duration = random.uniform(10, 30)
+                t_windows.append([round(start, 2), round(start + duration, 2)])
+
+    if no_fuel:
+        a = 0.0
+        b = 0.0
+    else:
+        a = 0.5
+        b = 0.01
 
     data = {
         "n": n_cities,
         "c_matrix": c_matrix, # c_ij
         "t_matrix": t_matrix, # t_ij
         "t_windows": t_windows, # [e_i, l_i]
-        "a": 0.5, # paliwo liniowy
-        "b": 0.01, # paliwo kwadratowy
+        "a": a, # paliwo liniowy
+        "b": b, # paliwo kwadratowy
         "M": 10000 # stała
     }
 
@@ -70,5 +80,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate Data for TSP problem")
     parser.add_argument("-n", "--n-cities", type=int, default=20, help="Number of cities")
     parser.add_argument("-o", "--output", type=str, default="tsp_data.json", help="Output file name")
+    
+    parser.add_argument("--no-fuel", action="store_true", help="Generate data without fuel constraints")
+    parser.add_argument("--no-time", action="store_true", help="Generate data without time constraints")
     args = parser.parse_args()
-    generate_data(args.n_cities, args.output)
+    generate_data(args.n_cities, args.output, args.no_fuel, args.no_time)
