@@ -67,7 +67,7 @@ static Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19
         std::partial_sort(candidates.begin(), candidates.begin() + k, candidates.end(),
                           [](const Candidate &a, const Candidate &b)
                           {
-                              return a.heuristic_cost < b.heuristic_cost;
+                              return a.cost < b.cost;
                           });
 
         // losowanie miasta

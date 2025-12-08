@@ -25,7 +25,7 @@ struct Solution
 struct Candidate
 {
     int city_index;
-    double heuristic_cost; // odległość + kara + czas
+    double cost; // odległość + kara + czas
 };
 
 #endif
