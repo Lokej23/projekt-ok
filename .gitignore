@@ -43,3 +43,9 @@
 /data/*.json
 
 /build
+
+docs/html/
+docs/latex/
+docs/man/
+docs/rtf/
+docs/xml/

@@ -6,6 +6,18 @@
 #include <limits>
 #include <omp.h>
 
+/**
+ * @file tsp_greedy_solver.cpp
+ * @brief Implementacja algorytmu zachłannego z losowaniem z RCL z wykorzystaniem biblioteki OpenMP.
+ */
+
+/**
+ * @brief Generuje pojedyncze rozwiązanie metodą zachłanną z RCL.
+ * @param data Dane problemu.
+ * @param k_best Rozmiar listy RCL.
+ * @param rng Generator losowy.
+ * @return Wygenerowane rozwiązanie.
+ */
 static Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19937 &rng)
 {
     int n = data.n;
@@ -13,20 +25,20 @@ static Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19
     route.reserve(n + 1);
     std::vector<bool> visited(n, false);
 
-    // start w 0
+    /// Start w mieście 0.
     int current_node = 0;
     route.push_back(current_node);
     visited[current_node] = true;
 
-    double current_time = 0.0; // czas 0
+    double current_time = 0.0; ///< Aktualny czas (start: 0).
 
-    // odwiedzanie miast
+    /// Konstrukcja trasy: kolejne wybory miasta.
     for (int step = 1; step < n; ++step)
     {
         std::vector<Candidate> candidates;
         candidates.reserve(n - step);
 
-        // tworzenie listy kandydatów
+        /// Budowa listy kandydatów.
         for (int next_node = 0; next_node < n; ++next_node)
         {
             if (visited[next_node])
@@ -35,34 +47,34 @@ static Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19
             double dist = data.c_matrix[current_node][next_node];
             double drive_time = data.t_matrix[current_node][next_node];
 
-            // czas
+            /// Czas przyjazdu, ewentualne oczekiwanie i kara.
             double arrival = current_time + drive_time;
             double wait_time = 0.0;
             double penalty = 0.0;
 
-            // okna czasowe
+            /// Okna czasowe.
             double e_i = data.windows[next_node].first;
             double l_i = data.windows[next_node].second;
 
             if (arrival < e_i)
             {
                 wait_time = e_i - arrival;
-                arrival = e_i; // jeśli przyjechano za wcześnie
+                arrival = e_i; ///< Jeśli przyjechano za wcześnie.
             }
             if (arrival > l_i)
             {
-                penalty = arrival - l_i; // kara za spóźnienie
+                penalty = arrival - l_i; ///< Kara za spóźnienie.
             }
 
-            double fuel_cost = CalcFuelCost(dist, data.a, data.b); // koszt paliwa
+            double fuel_cost = CalcFuelCost(dist, data.a, data.b); ///< Koszt paliwa.
 
-            // heurystyka: kara jest gorsza od czasu oczekiwania
+            /// Heurystyka: kara jest gorsza od czasu oczekiwania.
             double score = (dist + fuel_cost) + (penalty * 2.0) + (wait_time * 0.5);
 
             candidates.push_back({next_node, score});
         }
 
-        // partial sort k_best kandydatów z listy RCL
+        /// Sortowanie częściowe, aby dostać k_best dla RCL.
         int k = std::min((int)candidates.size(), k_best);
         std::partial_sort(candidates.begin(), candidates.begin() + k, candidates.end(),
                           [](const Candidate &a, const Candidate &b)
@@ -70,14 +82,14 @@ static Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19
                               return a.cost < b.cost;
                           });
 
-        // losowanie miasta
+        /// Losowanie miasta z RCL.
         std::uniform_int_distribution<> distr(0, k - 1);
         int chosen_idx = distr(rng);
         Candidate chosen = candidates[chosen_idx];
 
         int next_city = chosen.city_index;
 
-        // czas dla dokładnie wybranego miasta
+        /// Aktualizacja czasu dla wybranego miasta.
         double final_drive_time = data.t_matrix[current_node][next_city];
         double final_arrival = current_time + final_drive_time;
         if (final_arrival < data.windows[next_city].first)
@@ -85,20 +97,20 @@ static Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19
             final_arrival = data.windows[next_city].first;
         }
 
-        // aktualizacja stanu
+        /// Aktualizacja stanu.
         current_time = final_arrival;
         current_node = next_city;
         route.push_back(current_node);
         visited[current_node] = true;
     }
 
-    // powrót do bazy
+    /// Powrót do bazy.
     route.push_back(0);
 
-    // końcowe rozwiązanie
+    /// Złożenie końcowego rozwiązania.
     Solution sol;
     sol.route = route;
-    // wyliczanie kosztu funkcją weryfikującą
+    /// Wyliczanie kosztu funkcją weryfikującą.
     sol.total_cost = EvaluateSolution(data, route);
     sol.is_valid = true;
 
@@ -108,19 +120,19 @@ static Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19
 Solution RunParallelGreedySolver(const ProblemData &data, int iterations, int k_best)
 {
     Solution global_best;
-    global_best.total_cost = std::numeric_limits<double>::max(); // największa wartość
+    global_best.total_cost = std::numeric_limits<double>::max(); ///< Inicjalizacja: największa wartość.
     global_best.is_valid = false;
 
 #pragma omp parallel
     {
-        // inny seed dla każdego wątku
+        /// Inny seed dla każdego wątku.
         std::random_device rd;
         std::mt19937 thread_rng(rd() + omp_get_thread_num());
 
         Solution thread_best;
         thread_best.total_cost = std::numeric_limits<double>::max();
 
-// podział pętli na wątki
+        /// Podział pętli na wątki.
 #pragma omp for
         for (int i = 0; i < iterations; ++i)
         {
@@ -132,7 +144,7 @@ Solution RunParallelGreedySolver(const ProblemData &data, int iterations, int k_
             }
         }
 
-// tylko jeden wątek na raz aktualizuje najlepsze rozwiązanie
+        /// Tylko jeden wątek na raz aktualizuje najlepsze rozwiązanie.
 #pragma omp critical
         {
             if (thread_best.total_cost < global_best.total_cost)

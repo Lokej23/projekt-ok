@@ -7,6 +7,10 @@
 
 using json = nlohmann::json;
 
+/**
+ * @brief Wczytuje dane problemu z pliku JSON.
+ * Wymaga biblioteki nlohmann/json.hpp.
+ */
 bool LoadData(const std::string &filename, ProblemData &data)
 {
     std::ifstream f(filename);
@@ -39,12 +43,17 @@ bool LoadData(const std::string &filename, ProblemData &data)
     return true;
 }
 
+/**
+ * @brief Oblicza koszt paliwa: $f = a \cdot d + b \cdot d^2$.
+ */
 double CalcFuelCost(double distance, double a, double b)
 {
-    // f_ij = a * c_ij + b * c_ij^2
     return a * distance + b * std::pow(distance, 2);
 }
 
+/**
+ * @brief Wylicza koszt trasy (odległość + paliwo + kara za spóźnienie).
+ */
 double EvaluateSolution(const ProblemData &data, const std::vector<int> &route)
 {
     double total_cost = 0.0;
