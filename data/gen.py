@@ -2,6 +2,10 @@ import json
 import random
 import math
 import argparse
+import sys
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 def checkJson(name: str) -> str:
     if not name.lower().endswith(".json"):
@@ -74,7 +78,7 @@ def generate_data(n_cities, filename, no_fuel=False, no_time=False):
     with open(path, 'w') as f:
         json.dump(data, f, indent=4)
     
-    print(f"Wygenerowano plik {path} dla {n_cities} miast.")
+    eprint(f"Wygenerowano plik {path} dla {n_cities} miast.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate Data for TSP problem")

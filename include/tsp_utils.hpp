@@ -46,6 +46,22 @@ bool LoadData(const std::string &filename, ProblemData &data);
 double CalcFuelCost(double distance, double a, double b);
 
 /**
+ * @brief Zapisuje wyniki do pliku JSON.
+ * @param filename Ścieżka do pliku wyjściowego.
+ * @param solution Znalezione rozwiązanie.
+ * @param execution_time Czas wykonania obliczeń.
+ */
+
+/**
+ * @brief Zapisuje wyniki do pliku JSON.
+ * 
+ * @param filename Ścieżka do pliku wyjściowego.
+ * @param solution Znalezione rozwiązanie.
+ * @param execution_time Czas wykonania obliczeń.
+ */
+void SaveResults(const std::string &filename, const Solution &solution, double execution_time);
+
+/**
  * @brief Wylicza koszt trasy (odległość + paliwo + kara za okna czasowe).
  * @param data Dane problemu.
  * @param route Trasa (sekwencja indeksów miast).
