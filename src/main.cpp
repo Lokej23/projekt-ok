@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-        std::cerr << "Uzycie: " << argv[0] << " path/file.json iterations k" << std::endl;
+        std::cerr << "Uzycie: " << argv[0] << " [input_path] [output_path] [iterations] [k]" << std::endl;
         return 1;
     }
     std::string filename = argv[1];
@@ -34,8 +34,8 @@ int main(int argc, char *argv[])
     }
     else
     {
-        iterations = std::stoi(argv[2]);
-        k_best = std::stoi(argv[3]);
+        iterations = std::stoi(argv[3]);
+        k_best = std::stoi(argv[4]);
     };
 
     std::cerr << "Liczba iteracji: " << iterations << ", k najlepszych: " << k_best << std::endl;
@@ -59,12 +59,20 @@ int main(int argc, char *argv[])
     }
     std::cerr << std::endl;
 
-    std::string output_filename = filename;
-    size_t lastindex = output_filename.find_last_of("."); 
-    if (lastindex != std::string::npos) {
-        output_filename = output_filename.substr(0, lastindex); 
+    std::string output_filename;
+    if (argc >= 3)
+    {
+        output_filename = argv[2];
     }
-    output_filename += "_results.json";
+    else
+    {
+        output_filename = filename;
+        size_t lastindex = output_filename.find_last_of("."); 
+        if (lastindex != std::string::npos) {
+            output_filename = output_filename.substr(0, lastindex); 
+        }
+        output_filename += "_result.json";
+    }
     
     SaveResults(output_filename, best, end_time - start_time);
     std::cerr << "Wyniki zapisano do: " << output_filename << std::endl;
