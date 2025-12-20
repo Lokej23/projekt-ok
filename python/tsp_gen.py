@@ -2,10 +2,7 @@ import json
 import random
 import math
 import argparse
-import sys
-
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+from tsp_utils import eprint
 
 def checkJson(name: str) -> str:
     if not name.lower().endswith(".json"):
@@ -15,7 +12,7 @@ def checkJson(name: str) -> str:
 def distance(p1, p2):
     return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
 
-def generate_data(n_cities, filename, no_fuel=False, no_time=False):
+def generateData(n_cities, filename, no_fuel=False, no_time=False):
     width, height = 100, 100
     coords = []
     
@@ -88,4 +85,4 @@ if __name__ == "__main__":
     parser.add_argument("--no-fuel", action="store_true", help="Generate data without fuel constraints")
     parser.add_argument("--no-time", action="store_true", help="Generate data without time constraints")
     args = parser.parse_args()
-    generate_data(args.n_cities, args.output, args.no_fuel, args.no_time)
+    generateData(args.n_cities, args.output, args.no_fuel, args.no_time)
