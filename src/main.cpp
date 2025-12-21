@@ -33,7 +33,10 @@ int main(int argc, char *argv[])
     args::ValueFlag<std::string> arg_output(parser, "output_path", "Sciezka do pliku wynikowego", {'o', "output"});
 
     // Algorytm
-    args::ValueFlag<std::string> arg_algorithm(parser, "algorithm", "Algorytm rozwiazywania: 'greedy' lub 'sa' (domyslnie 'greedy')", {'a', "algorithm"});
+    args::Group group(parser, "Algorytmy (wybierz jeden):", args::Group::Validators::AtMostOne);
+    args::Flag arg_greedy(group, "greedy", "Uzyj algorytmu zachlannego (domyslnie)", {'g', "greedy"});
+    args::Flag arg_sa(group, "sa", "Uzyj algorytmu symulowanego wyzarzania", {'s', "sa"});
+
 
     // parametry algorytmów
     args::ValueFlag<int> arg_iterations(parser, "iterations", "Liczba iteracji (domyslnie 1000)", {'i', "iterations"});
@@ -75,7 +78,10 @@ int main(int argc, char *argv[])
 
     int iterations = arg_iterations ? args::get(arg_iterations) : 1000;
     int k_best = arg_k ? args::get(arg_k) : 4;
-    std::string algorithm = arg_algorithm ? args::get(arg_algorithm) : "greedy";
+    std::string algorithm = "greedy";
+    if (arg_sa) {
+        algorithm = "sa";
+    }
     
     // Parametry SA
     double initial_temp = arg_T ? args::get(arg_T) : 5000.0;
