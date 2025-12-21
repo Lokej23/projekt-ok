@@ -18,7 +18,7 @@
  * @param rng Generator losowy.
  * @return Wygenerowane rozwiązanie.
  */
-static Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19937 &rng)
+Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19937 &rng)
 {
     int n = data.n;
     std::vector<int> route;
