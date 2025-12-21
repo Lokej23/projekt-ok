@@ -89,3 +89,25 @@ double EvaluateSolution(const ProblemData &data, const std::vector<int> &route)
 
     return total_cost + penalty_sum;
 }
+
+/**
+ * @brief Zapisuje wyniki do pliku JSON.
+ */
+void SaveResults(const std::string &filename, const Solution &solution, double execution_time)
+{
+    json j;
+    j["total_cost"] = solution.total_cost;
+    j["route"] = solution.route;
+    j["is_valid"] = solution.is_valid;
+    j["execution_time"] = execution_time;
+
+    std::ofstream f(filename);
+    if (f.is_open())
+    {
+        f << j.dump(4);
+    }
+    else
+    {
+        std::cerr << "Nie udalo sie zapisac wynikow do pliku " << filename << std::endl;
+    }
+}

@@ -8,13 +8,13 @@ int main(int argc, char *argv[])
 {
     if (argc < 2)
     {
-        std::cerr << "Uzycie: " << argv[0] << " path/file.json iterations k" << std::endl;
+        std::cerr << "Uzycie: " << argv[0] << " [input_path] [output_path] [iterations] [k]" << std::endl;
         return 1;
     }
     std::string filename = argv[1];
     ProblemData data;
 
-    std::cout << "--- TSP z ograniczeniem czasu i paliwa ---" << std::endl;
+    std::cerr << "--- TSP z ograniczeniem czasu i paliwa ---" << std::endl;
 
     if (!LoadData(filename, data))
     {
@@ -22,8 +22,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::cout << "Wczytano " << data.n << " miast." << std::endl;
-    std::cout << "Liczba watkow: " << omp_get_max_threads() << std::endl;
+    std::cerr << "Wczytano " << data.n << " miast." << std::endl;
+    std::cerr << "Liczba watkow: " << omp_get_max_threads() << std::endl;
 
     int iterations;
     int k_best;
@@ -34,12 +34,12 @@ int main(int argc, char *argv[])
     }
     else
     {
-        iterations = std::stoi(argv[2]);
-        k_best = std::stoi(argv[3]);
+        iterations = std::stoi(argv[3]);
+        k_best = std::stoi(argv[4]);
     };
 
-    std::cout << "Liczba iteracji: " << iterations << ", k najlepszych: " << k_best << std::endl;
-    std::cout << "Rozpoczynanie obliczen..." << std::endl;
+    std::cerr << "Liczba iteracji: " << iterations << ", k najlepszych: " << k_best << std::endl;
+    std::cerr << "Rozpoczynanie obliczen..." << std::endl;
 
     double start_time = omp_get_wtime();
 
@@ -47,17 +47,35 @@ int main(int argc, char *argv[])
 
     double end_time = omp_get_wtime();
 
-    std::cout << "----------------------------------------" << std::endl;
-    std::cout << "Czas obliczen: " << (end_time - start_time) << " s" << std::endl;
-    std::cout << "Najlepszy znaleziony koszt Z: " << best.total_cost << std::endl;
-    std::cout << "Trasa: ";
+    std::cerr << "----------------------------------------" << std::endl;
+    std::cerr << "Czas obliczen: " << (end_time - start_time) << " s" << std::endl;
+    std::cerr << "Najlepszy znaleziony koszt Z: " << best.total_cost << std::endl;
+    std::cerr << "Trasa: ";
     for (size_t i = 0; i < best.route.size(); ++i)
     {
-        std::cout << best.route[i];
+        std::cerr << best.route[i];
         if (i < best.route.size() - 1)
-            std::cout << " -> ";
+            std::cerr << " -> ";
     }
-    std::cout << std::endl;
+    std::cerr << std::endl;
+
+    std::string output_filename;
+    if (argc >= 3)
+    {
+        output_filename = argv[2];
+    }
+    else
+    {
+        output_filename = filename;
+        size_t lastindex = output_filename.find_last_of("."); 
+        if (lastindex != std::string::npos) {
+            output_filename = output_filename.substr(0, lastindex); 
+        }
+        output_filename += "_result.json";
+    }
+    
+    SaveResults(output_filename, best, end_time - start_time);
+    std::cerr << "Wyniki zapisano do: " << output_filename << std::endl;
 
     return 0;
 }
