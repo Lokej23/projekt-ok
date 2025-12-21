@@ -5,8 +5,37 @@ import os
 from datetime import timedelta
 from tsp_utils import eprint 
 
+def reconstructRoute(x_matrix, start_node=0):
+    n = len(x_matrix)
+    route = [start_node]
+    current = start_node
+    
+    visited_count = 0
+    
+    while True:
+        next_city = -1
+        for j in range(n):
+            val = x_matrix[current][j]
+            if val == 1 or val is True:
+                next_city = j
+                break
+        
+        if next_city == -1:
+            break
+            
+        route.append(next_city)
+        current = next_city
+        visited_count += 1
+        
+        if current == start_node:
+            break
+            
+        if visited_count > n + 1:
+            break
+
+    return route
+
 def solveTspMinizinc(model_path, data_path, solver_name, timeout_sec, output_path):
-    eprint(f"--- TSP z ograniczeniami czasu i paliwa (MiniZinc) ---")
     eprint(f"Model:   {model_path}")
     eprint(f"Dane:    {data_path}")
     eprint(f"Wynik:   {output_path}")
@@ -15,6 +44,7 @@ def solveTspMinizinc(model_path, data_path, solver_name, timeout_sec, output_pat
     eprint(f"--------------------")
 
     solver = minizinc.Solver.lookup(solver_name)
+
     model = minizinc.Model(model_path)
     instance = minizinc.Instance(solver, model)
 
@@ -34,11 +64,11 @@ def solveTspMinizinc(model_path, data_path, solver_name, timeout_sec, output_pat
     result = instance.solve(timeout=timedelta(seconds=timeout_sec))
 
     output_data = {
-        "total_cost": float('inf'),
-        "route": [],
-        "is_valid": False,
         "execution_time": 0.0,
-        "status": str(result.status)
+        "is_valid": False,
+        "route": [],
+        "total_cost": float('inf'),
+        # "status": str(result.status)
     }
 
     if result.status == minizinc.Status.OPTIMAL_SOLUTION or result.status == minizinc.Status.SATISFIED:
@@ -48,6 +78,10 @@ def solveTspMinizinc(model_path, data_path, solver_name, timeout_sec, output_pat
         
         output_data["total_cost"] = result.objective
         output_data["is_valid"] = True
+        
+        x_matrix = result["x"]
+        route = reconstructRoute(x_matrix)
+        output_data["route"] = route
         
         time_stat = result.statistics.get('solveTime')
         if time_stat:
@@ -69,7 +103,7 @@ def solveTspMinizinc(model_path, data_path, solver_name, timeout_sec, output_pat
 
     with open(output_path, 'w') as f:
         json.dump(output_data, f, indent=4)
-    eprint(f"Zapisano wyniki do pliku: {output_path}")
+        eprint(f"Zapisano wyniki do pliku: {output_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Uruchom model MiniZinc TSP.")

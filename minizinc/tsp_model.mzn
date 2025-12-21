@@ -31,6 +31,7 @@ solve minimize Z;
 % Każde miasto odwiedzone dokładnie raz
 constraint forall(j in V) ( 
     sum(i in V) (x[i,j]) = 1 
+);
 constraint forall(i in V) ( 
     sum(j in V) (x[i,j]) = 1 
 );
