@@ -1,3 +1,4 @@
+# Algorytm napisany przy użyciu Gemini Pro 3
 import json
 import math
 import sys

@@ -28,6 +28,7 @@ set(SOURCES
     src/main.cpp 
     src/tsp_utils.cpp 
     src/tsp_greedy_solver.cpp
+    src/tsp_sa_solver.cpp
 )
 
 add_executable(tsp_solver ${SOURCES})

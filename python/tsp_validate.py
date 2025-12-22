@@ -116,4 +116,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    validateSolution(args.data, args.solution)
+    if (validateSolution(args.data, args.solution)):
+        exit(0)
+    else:
+        exit(1)

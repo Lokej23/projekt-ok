@@ -10,6 +10,16 @@
  */
 
 /**
+ * @brief Generuje pojedyncze rozwiązanie metodą zachłanną z RCL.
+ *
+ * @param data Dane problemu.
+ * @param k_best Rozmiar listy RCL.
+ * @param rng Generator losowy.
+ * @return Wygenerowane rozwiązanie.
+ */
+Solution GenGreedySolution(const ProblemData &data, int k_best, std::mt19937 &rng);
+
+/**
  * @brief Uruchamia wielokrotnie algorytm zachłanny i zwraca najlepsze znalezione rozwiązanie.
  *
  * Funkcja uruchamia wiele iteracji na wielu wątkach i wybiera najlepszy wynik.
