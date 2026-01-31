@@ -68,7 +68,7 @@ def solveTspMinizinc(model_path, data_path, solver_name, timeout_sec, output_pat
         "is_valid": False,
         "route": [],
         "total_cost": float('inf'),
-        # "status": str(result.status)
+        "status": str(result.status)
     }
 
     if result.status == minizinc.Status.OPTIMAL_SOLUTION or result.status == minizinc.Status.SATISFIED:
