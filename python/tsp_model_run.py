@@ -2,6 +2,7 @@ import minizinc
 import json
 import argparse
 import os
+import time
 from datetime import timedelta
 from tsp_utils import eprint 
 
@@ -61,11 +62,17 @@ def solveTspMinizinc(model_path, data_path, solver_name, timeout_sec, output_pat
 
     eprint("Rozpoczynanie obliczeń...")
 
+    start_time = time.perf_counter()
     result = instance.solve(timeout=timedelta(seconds=timeout_sec))
+    end_time = time.perf_counter()
+    wall_time = end_time - start_time
 
     output_data = {
-        "execution_time": 0.0,
+        "execution_time": wall_time,
+        "solve_time": None,
         "is_valid": False,
+        "is_optimal": False,
+        "timeout_hit": False,
         "route": [],
         "total_cost": float('inf'),
         "status": str(result.status)
@@ -78,16 +85,20 @@ def solveTspMinizinc(model_path, data_path, solver_name, timeout_sec, output_pat
         
         output_data["total_cost"] = result.objective
         output_data["is_valid"] = True
+        output_data["is_optimal"] = (result.status == minizinc.Status.OPTIMAL_SOLUTION)
         
         x_matrix = result["x"]
         route = reconstructRoute(x_matrix)
         output_data["route"] = route
         
         time_stat = result.statistics.get('solveTime')
-        if time_stat:
-            seconds = time_stat.total_seconds()
-            output_data["execution_time"] = seconds
-            eprint(f"Czas obliczeń: {seconds:.4f}s")
+        if time_stat is not None:
+            seconds = time_stat.total_seconds() if hasattr(time_stat, "total_seconds") else float(time_stat)
+            output_data["solve_time"] = seconds
+            eprint(f"Czas obliczeń (solveTime): {seconds:.4f}s")
+
+        eprint(f"Czas całkowity (wall): {wall_time:.4f}s")
+        output_data["timeout_hit"] = wall_time >= max(timeout_sec - 0.5, 0.0) and not output_data["is_optimal"]
             
     elif result.status == minizinc.Status.UNSATISFIABLE:
         eprint("=== WYNIK: UNSATISFIABLE ===")
@@ -98,6 +109,7 @@ def solveTspMinizinc(model_path, data_path, solver_name, timeout_sec, output_pat
         eprint("=== WYNIK: UNKNOWN ===")
         eprint("Upłynął limit czasu.")
         output_data["is_valid"] = False
+        output_data["timeout_hit"] = True
     else:
         eprint(f"Status końcowy: {result.status}")
 
