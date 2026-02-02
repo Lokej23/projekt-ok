@@ -3,18 +3,7 @@ import sys
 import subprocess
 import json
 import argparse
-from tsp_utils import loadJson, eprint
-
-def runCommand(cmd):
-    try:
-        subprocess.run(cmd, check=True, capture_output=True, text=True)
-    except subprocess.CalledProcessError as e:
-        eprint(f"[BŁĄD] {e.returncode}:")
-        eprint(f"Polecenie: {' '.join(cmd)}")
-        eprint(f"--- ERROR ---")
-        eprint(e.stderr)
-        eprint(f"----------------------------")
-        sys.exit(1)
+from tsp_utils import loadJson, eprint, runCommand
 
 def loadResult(path):
     if not os.path.exists(path):
